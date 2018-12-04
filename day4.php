@@ -2,21 +2,14 @@
 
 function part1($input)
 {
-    $asleepTime = [];
-    $asleepMinutes = [];
+    $asleepTime = $asleepMinutes = [];
 
     foreach ($input as $row) {
         if (strpos($row, 'Guard ')) {
-            $guardId = substr($row, strpos($row, 'Guard ') + 7, -13);
+            $guardId = substr($row, 26, -13);
             continue;
-        }
-
-        if (strpos($row, 'falls ')) {
-            if (substr($row, 12, 2) != 0) {
-                $sleepStart = 0;
-            } else {
-                $sleepStart = substr($row, 15, 2);
-            }
+        } elseif (strpos($row, 'falls ')) {
+            $sleepStart = substr($row, 12, 2) != 0 ? 0 : substr($row, 15, 2);
         } elseif (strpos($row, 'wakes ')) {
             if (! isset($asleepTime[$guardId])) {
                 $asleepTime[$guardId] = 0;
@@ -34,11 +27,10 @@ function part1($input)
         }
     }
 
-    $guardId = implode(', ', array_keys($asleepTime, max($asleepTime)));
+    $guardId = current(array_keys($asleepTime, max($asleepTime)));
+    $mostOftenAsleep = current(array_keys($asleepMinutes[$guardId], max($asleepMinutes[$guardId])));
 
-    $mostOftenAsleep = implode(', ', array_keys($asleepMinutes[$guardId], max($asleepMinutes[$guardId]))). "\n";
-
-    return $guardId . ' x ' . $mostOftenAsleep;
+    return $guardId * $mostOftenAsleep;
 }
 
 function part2($input)
@@ -47,16 +39,10 @@ function part2($input)
 
     foreach ($input as $row) {
         if (strpos($row, 'Guard ')) {
-            $guardId = substr($row, strpos($row, 'Guard ') + 7, -13);
+            $guardId = substr($row, 26, -13);
             continue;
-        }
-
-        if (strpos($row, 'falls ')) {
-            if (substr($row, 12, 2) != 0) {
-                $sleepStart = 0;
-            } else {
-                $sleepStart = substr($row, 15, 2);
-            }
+        } elseif (strpos($row, 'falls ')) {
+            $sleepStart = substr($row, 12, 2) != 0 ? 0 : substr($row, 15, 2);
         } elseif (strpos($row, 'wakes ')) {
             $sleepEnd = substr($row, 15, 2);
 
@@ -69,22 +55,20 @@ function part2($input)
         }
     }
 
-    $currMax = 0;
-    $currGuardId = 0;
+    $currMaxSum = $currMaxMinute = 0;
     foreach ($asleepMinutes as $guardId => $row) {
-        if (max($row) > $currMax) {
-            $currGuardId = $guardId;
-            $currMax = implode(', ', array_keys($row, max($row)));
+        if (max($row) > $currMaxMinute) {
+            $currMaxMinute = max($row);
+            $currMaxSum = $guardId * current(array_keys($row, max($row)));
         }
     }
 
-    return $currGuardId . ' x ' . $currMax;
+    return $currMaxSum;
 }
 
 $input = array_filter(explode("\n", file_get_contents('input_day4.txt')));
 
 asort($input);
-
 
 echo part1($input) . "\n";
 echo part2($input) . "\n";
